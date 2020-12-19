@@ -33,5 +33,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: AlexDobrushskiy/mn-agent/mn_explorer_server:1.0
-          tag_with_ref: true          
+          repository: alexdobrushskiy/mn-agent/mn_explorer_server:1.0
+          tag_with_ref: false

@@ -24,9 +24,6 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - name: docker build
-        run: |
-          docker build . -t mn_explorer_server:1.0
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v1
         with:

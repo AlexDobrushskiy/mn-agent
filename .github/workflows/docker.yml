@@ -27,3 +27,11 @@ jobs:
       - name: docker build
         run: |
           docker build . -t mn_explorer_server:1.0
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: AlexDobrushskiy/mn-agent/mn_explorer_server:1.0
+          tag_with_ref: true          

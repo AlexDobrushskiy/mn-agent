@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import re_path, include
 import main.urls
+from main.views import show_masternode_data
 
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^api/', include(main.urls)),
-
+    re_path(r'^$', show_masternode_data),
 ]

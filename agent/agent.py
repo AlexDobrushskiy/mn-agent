@@ -10,6 +10,7 @@ if __name__ == '__main__':
         time.sleep(3)
         balance = int(blockchain.getbalance())
         address = blockchain.getaccountaddress()
+        requests.put('')
         print(balance)
         print(address)
         print(MY_IP)

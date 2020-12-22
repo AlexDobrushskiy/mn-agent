@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from django.shortcuts import render
 from rest_framework import generics, serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
-from main.models import Masternode
+from main.models import Masternode, Regticket
 
 
 class MasternodeSerializer(serializers.ModelSerializer):
@@ -10,10 +13,10 @@ class MasternodeSerializer(serializers.ModelSerializer):
         model = Masternode
         fields = ('ip', 'address', 'balance', 'pastelID')
 
-# class RegticketSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Regticket
-#         fields = ('masternode_pastelid', 'artist_pastelid', 'image_hash', 'status')
+class RegticketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Regticket
+        fields = ('artist_pastelid', 'image_hash', 'status')
 
 
 class MasternodeApiView(generics.UpdateAPIView):
@@ -28,20 +31,22 @@ class MasternodeApiView(generics.UpdateAPIView):
         obj, created = Masternode.objects.get_or_create(ip=ip)
         return obj
 
-# class RegticketApiView(generics.UpdateAPIView):
-#     serializer_class = RegticketSerializer
-#     http_method_names = ['post']
-#
-#     def get_object(self):
-#         pastelID = self.request.data.get('masternode_pastelid')
-#         if not pastelID:
-#             raise ValidationError({'pastelID': ["This field is required."]})
-#         obj, created = Regticket.objects.get_or_create(masternode_pastelid=pastelID)
-#         return obj
+class RegticketApiView(generics.UpdateAPIView):
+    serializer_class = RegticketSerializer
+    http_method_names = ['post']
+
+    def post(self, p):
+        print(self.request.data.get('artist_pastelid'))
+        artist_pastelid = self.request.data.get('artist_pastelid')
+        if not artist_pastelid:
+            raise ValidationError({'artist_pastelid': ["This field is required."]})
+        obj, created = Regticket.objects.get_or_create(artist_pastelid=artist_pastelid,
+                                                       defaults={'status': '0',
+                                                                 'created': datetime.now(),})
+        return Response('done')
 
 def show_masternode_data(request):
     field_names = [f.name for f in Masternode._meta.get_fields()]
-    print(field_names)
     masternodes = []
     for mn in Masternode.objects.all():
         line = dict()

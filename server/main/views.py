@@ -8,7 +8,12 @@ from main.models import Masternode
 class MasternodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Masternode
-        fields = ('ip', 'address', 'balance','pastelID')
+        fields = ('ip', 'address', 'balance', 'pastelID')
+
+# class RegticketSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Regticket
+#         fields = ('masternode_pastelid', 'artist_pastelid', 'image_hash', 'status')
 
 
 class MasternodeApiView(generics.UpdateAPIView):
@@ -23,9 +28,20 @@ class MasternodeApiView(generics.UpdateAPIView):
         obj, created = Masternode.objects.get_or_create(ip=ip)
         return obj
 
+# class RegticketApiView(generics.UpdateAPIView):
+#     serializer_class = RegticketSerializer
+#     http_method_names = ['post']
+#
+#     def get_object(self):
+#         pastelID = self.request.data.get('masternode_pastelid')
+#         if not pastelID:
+#             raise ValidationError({'pastelID': ["This field is required."]})
+#         obj, created = Regticket.objects.get_or_create(masternode_pastelid=pastelID)
+#         return obj
 
 def show_masternode_data(request):
     field_names = [f.name for f in Masternode._meta.get_fields()]
+    print(field_names)
     masternodes = []
     for mn in Masternode.objects.all():
         line = dict()

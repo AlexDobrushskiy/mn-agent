@@ -8,7 +8,7 @@ from main.models import Masternode
 class MasternodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Masternode
-        fields = ('ip', 'address', 'balance',)
+        fields = ('ip', 'address', 'balance','pastelID')
 
 
 class MasternodeApiView(generics.UpdateAPIView):

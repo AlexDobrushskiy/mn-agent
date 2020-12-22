@@ -45,3 +45,15 @@ class MnAPITestCase(TestCase):
         r = self.client.post('/api/masternode/', data={"address": "NEW ADDR", "balance": 999},
                              content_type='application/json')
         self.assertEqual(r.status_code, 405)
+
+    def test_create_pastelID(self):
+        self.assertEqual(Masternode.objects.count(), 0)
+        r = self.client.put('/api/masternode/', data={"ip": "127.0.0.1",
+                                                      "address": "asdasd",
+                                                      "balance": 222,
+                                                      "pastelID": "asdasd"},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Masternode.objects.count(), 1)
+        self.assertEqual(Masternode.objects.first().ip, '127.0.0.1')
+        self.assertEqual(Masternode.objects.first().pastelID, 'asdasd')

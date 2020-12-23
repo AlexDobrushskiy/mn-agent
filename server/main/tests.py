@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from model_mommy import mommy
 
-from main.models import Masternode, Regticket
+from main.models import Masternode, Regticket, Chunk
 
 
 class MnAPITestCase(TestCase):
@@ -140,3 +140,89 @@ class RegticketAPITestCase(TestCase):
         self.assertEqual(Regticket.objects.count(), 1)
         self.assertEqual(r.json(), {'image_hash': ['Must be unique']})
 
+class ChunkAPITestCase(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+        self.mn = mommy.make(Masternode)
+
+    def test_create(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/chunk/',
+                             data={"mn_pastelid": masternode_pastelid,
+                                   "chunk_id": "efg",
+                                   "image_hash": "hijklmnop",
+                                   "indexed": "True",
+                                   "confirmed": "True",
+                                   "stored": "True"},
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Chunk.objects.count(), 1)
+        self.assertEqual(Chunk.objects.first().mn_pastelid.pastelID, masternode_pastelid)
+
+
+    def test_unique_chunk_id(self):
+        masternode_pastelid = self.mn.pastelID
+        self.client.post('/api/chunk/',
+                             data={"mn_pastelid": masternode_pastelid,
+                                   "chunk_id": "efg",
+                                   "image_hash": "hijklmnop",
+                                   "indexed": "True",
+                                   "confirmed": "True",
+                                   "stored": "True"},
+                             content_type='application/json')
+
+        r = self.client.post('/api/chunk/',
+                             data={"mn_pastelid": masternode_pastelid,
+                                   "chunk_id": "efg",
+                                   "image_hash": "hijklmnop",
+                                   "indexed": "True",
+                                   "confirmed": "True",
+                                   "stored": "True"},
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Chunk.objects.count(), 1)
+        self.assertEqual(r.json(), {'chunk_id': ['Must be unique']})
+
+    def test_required_mn_pastelid(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/chunk/',
+                             data={"mn_pastelid": masternode_pastelid,
+                                   "chunk_id": "",
+                                   "image_hash": "hijklmnop",
+                                   "indexed": "True",
+                                   "confirmed": "True",
+                                   "stored": "True"},
+                             content_type='application/json')
+
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Chunk.objects.count(), 0)
+        self.assertEqual(r.json(), {'chunk_id': ['This field is required.']})
+
+    def test_not_boolean_indexed(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/chunk/',
+                             data={"mn_pastelid": masternode_pastelid,
+                                   "chunk_id": "efg",
+                                   "image_hash": "hijklmnop",
+                                   "indexed": "3",
+                                   "confirmed": "True",
+                                   "stored": "True"},
+                             content_type='application/json')
+
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Chunk.objects.count(), 0)
+        self.assertEqual(r.json(), {'indexed': ["This field must be 'True' or 'False'"]})
+
+    def test_not_exist_pastelID(self):
+        r = self.client.post('/api/chunk/',
+                             data={"mn_pastelid": "abc",
+                                   "chunk_id": "efg",
+                                   "image_hash": "hijklmnop",
+                                   "indexed": "False",
+                                   "confirmed": "True",
+                                   "stored": "True"},
+                             content_type='application/json')
+
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Chunk.objects.count(), 0)
+        self.assertEqual(r.json(), {'masternode_pastelid': ['DoesNotExist']})

@@ -71,18 +71,42 @@ class ChunkApiView(generics.UpdateAPIView):
     serializer_class = ChunkSerializer
     http_method_names = ['post']
     def post(self, p):
-        mn_pastelid = self.request.data.get('mn_pastelid')
-        chunk_id = self.request.data.get('chunk_id')
-        image_hash = self.request.data.get('image_hash')
-        indexed = self.request.data.get('indexed')
-        confirmed = self.request.data.get('confirmed')
-        stored = self.request.data.get('stored')
-        obj, created = Chunk.objects.get_or_create(mn_pastelid=mn_pastelid,
-                                                       chunk_id=chunk_id,
-                                                       image_hash=image_hash,
-                                                       indexed=indexed,
-                                                       confirmed=confirmed,
-                                                       stored=stored,)
+        fields = ("mn_pastelid", "chunk_id", "image_hash", "indexed", "confirmed", "stored")
+        data = {}
+        for field in fields:
+            data[field] = self.request.data.get(field)
+            if not data[field]:
+                raise ValidationError({field: ["This field is required."]})
+
+        mn_pastelid = data['mn_pastelid']
+        chunk_id = data['chunk_id']
+        image_hash = data['image_hash']
+        indexed = data['indexed']
+        confirmed = data['confirmed']
+        stored = data['stored']
+
+
+        if indexed != "True" and indexed != "False":
+            raise ValidationError({'indexed': ["This field must be 'True' or 'False'"]})
+        if confirmed != "True" and confirmed != "False":
+            raise ValidationError({'confirmed': ["This field must be 'True' or 'False'"]})
+        if stored != "True" and stored != "False":
+            raise ValidationError({'stored': ["This field must be 'True' or 'False'"]})
+
+
+        if not Chunk.objects.filter(chunk_id=chunk_id).count() == 0:
+            raise ValidationError({'chunk_id': ["Must be unique"]})
+        try:
+            pastelID = Masternode.objects.get(pastelID=mn_pastelid)
+        except ObjectDoesNotExist:
+            raise ValidationError({'masternode_pastelid': ["DoesNotExist"]})
+
+        obj, created = Chunk.objects.get_or_create(mn_pastelid=pastelID,
+                                                   chunk_id=chunk_id,
+                                                   image_hash=image_hash,
+                                                   indexed=indexed,
+                                                   confirmed=confirmed,
+                                                   stored=stored,)
         serializer = ChunkSerializer(obj)
         return Response(serializer.data)
 

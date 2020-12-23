@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from rest_framework import generics, serializers
 from rest_framework.exceptions import ValidationError
@@ -16,7 +17,7 @@ class MasternodeSerializer(serializers.ModelSerializer):
 class RegticketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regticket
-        fields = ('artist_pastelid', 'image_hash', 'status')
+        fields = ('artist_pastelid', 'image_hash', 'status', 'created', 'masternode_pastelid')
 
 
 class MasternodeApiView(generics.UpdateAPIView):
@@ -34,16 +35,34 @@ class MasternodeApiView(generics.UpdateAPIView):
 class RegticketApiView(generics.UpdateAPIView):
     serializer_class = RegticketSerializer
     http_method_names = ['post']
-
     def post(self, p):
-        print(self.request.data.get('artist_pastelid'))
         artist_pastelid = self.request.data.get('artist_pastelid')
+        image_hash = self.request.data.get('image_hash')
+        pastelID = self.request.data.get('masternode_pastelid')
         if not artist_pastelid:
             raise ValidationError({'artist_pastelid': ["This field is required."]})
+
+        if not image_hash:
+            raise ValidationError({'image_hash': ["This field is required."]})
+        if not Regticket.objects.filter(image_hash=image_hash).count() == 0:
+            raise ValidationError({'image_hash': ["Must be unique"]})
+
+        if not pastelID:
+            raise ValidationError({'masternode_pastelid': ["This field is required."]})
+        if not Regticket.objects.filter(masternode_pastelid=pastelID).count() == 0:
+            raise ValidationError({'masternode_pastelid': ["Must be unique"]})
+        try:
+            masternode = Masternode.objects.get(pastelID=pastelID)
+        except ObjectDoesNotExist:
+            raise ValidationError({'masternode_pastelid': ["DoesNotExist"]})
+
         obj, created = Regticket.objects.get_or_create(artist_pastelid=artist_pastelid,
+                                                       image_hash=image_hash,
+                                                       masternode_pastelid=masternode,
                                                        defaults={'status': '0',
                                                                  'created': datetime.now(),})
-        return Response('done')
+        serializer = RegticketSerializer(obj)
+        return Response(serializer.data)
 
 def show_masternode_data(request):
     field_names = [f.name for f in Masternode._meta.get_fields()]
@@ -51,7 +70,10 @@ def show_masternode_data(request):
     for mn in Masternode.objects.all():
         line = dict()
         for field in field_names:
-            line[field] = getattr(mn, field)
+            try:
+                line[field] = getattr(mn, field)
+            except AttributeError:
+                line[field] = 'does not exist'
         masternodes.append(line)
     context = {
         'masternodes': masternodes,

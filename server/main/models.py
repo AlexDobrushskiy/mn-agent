@@ -20,7 +20,7 @@ class Masternode(models.Model):
 
 class Regticket(models.Model):
     id = models.AutoField(primary_key=True)
-    # masternode_pastelid = models.ForeignKey(Masternode, on_delete=models.CASCADE, to_field='pastelID')
+    masternode_pastelid = models.ForeignKey(Masternode, on_delete=models.CASCADE, to_field='pastelID', null=True)
     artist_pastelid = models.CharField(max_length=86, null=True)
     image_hash = models.CharField(unique=True, max_length=64)
     status = models.IntegerField(choices=REGTICKET_STATUS_CHOICES)

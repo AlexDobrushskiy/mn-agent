@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from model_mommy import mommy
 
-from main.models import Masternode
+from main.models import Masternode, Regticket
 
 
 class MnAPITestCase(TestCase):
@@ -57,3 +57,86 @@ class MnAPITestCase(TestCase):
         self.assertEqual(Masternode.objects.count(), 1)
         self.assertEqual(Masternode.objects.first().ip, '127.0.0.1')
         self.assertEqual(Masternode.objects.first().pastelID, 'asdasd')
+
+class RegticketAPITestCase(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+        self.mn = mommy.make(Masternode)
+
+    def test_create(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/regticket/',
+                            data={"artist_pastelid":"alslr",
+                                  "status": "0",
+                                  "image_hash": "nl",
+                                  "masternode_pastelid": masternode_pastelid},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Regticket.objects.count(), 1)
+        self.assertEqual(Regticket.objects.first().image_hash, 'nl')
+
+    def test_no_masternode_pastelid(self):
+        r = self.client.post('/api/regticket/',
+                            data={"artist_pastelid":"alslr",
+                                  "status": "0",
+                                  "image_hash": "nl",
+                                  "masternode_pastelid": ""},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Regticket.objects.count(), 0)
+        self.assertEqual(r.json(), {'masternode_pastelid': ['This field is required.']})
+
+    def test_no_image_hash(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/regticket/',
+                            data={"artist_pastelid":"alslr",
+                                  "status": "0",
+                                  "image_hash": "",
+                                  "masternode_pastelid": masternode_pastelid},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Regticket.objects.count(), 0)
+        self.assertEqual(r.json(), {'image_hash': ['This field is required.']})
+
+    def test_no_artist_pastelid(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/regticket/',
+                            data={"artist_pastelid": "",
+                                  "status": "0",
+                                  "image_hash": "nl",
+                                  "masternode_pastelid": masternode_pastelid},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Regticket.objects.count(), 0)
+        self.assertEqual(r.json(), {'artist_pastelid': ['This field is required.']})
+
+    def test_masternode_does_not_exist(self):
+        r = self.client.post('/api/regticket/',
+                            data={"artist_pastelid": "alslr",
+                                  "status": "0",
+                                  "image_hash": "nl",
+                                  "masternode_pastelid": "sjdls"},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Regticket.objects.count(), 0)
+        self.assertEqual(r.json(), {'masternode_pastelid': ['DoesNotExist']})
+
+    def test_unique_image_hash(self):
+        masternode_pastelid = self.mn.pastelID
+        self.client.post('/api/regticket/',
+                            data={"artist_pastelid": "alslr",
+                                  "status": "0",
+                                  "image_hash": "nl",
+                                  "masternode_pastelid": masternode_pastelid},
+                            content_type='application/json')
+
+        r = self.client.post('/api/regticket/',
+                            data={"artist_pastelid":"alslsssss",
+                                  "status": "0",
+                                  "image_hash": "nl",
+                                  "masternode_pastelid": masternode_pastelid},
+                            content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Regticket.objects.count(), 1)
+        self.assertEqual(r.json(), {'image_hash': ['Must be unique']})
+

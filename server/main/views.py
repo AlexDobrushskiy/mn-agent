@@ -49,8 +49,6 @@ class RegticketApiView(generics.UpdateAPIView):
 
         if not pastelID:
             raise ValidationError({'masternode_pastelid': ["This field is required."]})
-        if not Regticket.objects.filter(masternode_pastelid=pastelID).count() == 0:
-            raise ValidationError({'masternode_pastelid': ["Must be unique"]})
         try:
             masternode = Masternode.objects.get(pastelID=pastelID)
         except ObjectDoesNotExist:
@@ -65,15 +63,12 @@ class RegticketApiView(generics.UpdateAPIView):
         return Response(serializer.data)
 
 def show_masternode_data(request):
-    field_names = [f.name for f in Masternode._meta.get_fields()]
+    field_names = ['id', 'ip', 'address', 'balance', 'pastelID']
     masternodes = []
     for mn in Masternode.objects.all():
         line = dict()
         for field in field_names:
-            try:
                 line[field] = getattr(mn, field)
-            except AttributeError:
-                line[field] = 'does not exist'
         masternodes.append(line)
     context = {
         'masternodes': masternodes,

@@ -6,7 +6,7 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from main.models import Masternode, Regticket
+from main.models import Masternode, Regticket, Chunk
 
 
 class MasternodeSerializer(serializers.ModelSerializer):
@@ -18,6 +18,11 @@ class RegticketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regticket
         fields = ('artist_pastelid', 'image_hash', 'status', 'created', 'masternode_pastelid')
+
+class ChunkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chunk
+        fields = ("mn_pastelid", "chunk_id", "image_hash", "indexed", "confirmed", "stored")
 
 
 class MasternodeApiView(generics.UpdateAPIView):
@@ -60,6 +65,25 @@ class RegticketApiView(generics.UpdateAPIView):
                                                        defaults={'status': '0',
                                                                  'created': datetime.now(),})
         serializer = RegticketSerializer(obj)
+        return Response(serializer.data)
+
+class ChunkApiView(generics.UpdateAPIView):
+    serializer_class = ChunkSerializer
+    http_method_names = ['post']
+    def post(self, p):
+        mn_pastelid = self.request.data.get('mn_pastelid')
+        chunk_id = self.request.data.get('chunk_id')
+        image_hash = self.request.data.get('image_hash')
+        indexed = self.request.data.get('indexed')
+        confirmed = self.request.data.get('confirmed')
+        stored = self.request.data.get('stored')
+        obj, created = Chunk.objects.get_or_create(mn_pastelid=mn_pastelid,
+                                                       chunk_id=chunk_id,
+                                                       image_hash=image_hash,
+                                                       indexed=indexed,
+                                                       confirmed=confirmed,
+                                                       stored=stored,)
+        serializer = ChunkSerializer(obj)
         return Response(serializer.data)
 
 def show_masternode_data(request):

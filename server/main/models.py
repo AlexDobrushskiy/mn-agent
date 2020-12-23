@@ -19,12 +19,22 @@ class Masternode(models.Model):
         return '{}'.format(self.ip)
 
 class Regticket(models.Model):
-    id = models.AutoField(primary_key=True)
     masternode_pastelid = models.ForeignKey(Masternode, on_delete=models.CASCADE, to_field='pastelID', null=True)
     artist_pastelid = models.CharField(max_length=86, null=True)
     image_hash = models.CharField(unique=True, max_length=64)
     status = models.IntegerField(choices=REGTICKET_STATUS_CHOICES)
     created = models.DateTimeField()
+
+    def __str__(self):
+        return '{}'.format(self.id)
+
+class Chunk(models.Model):
+    mn_pastelid = models.CharField(max_length=86, unique=True,)
+    chunk_id = models.CharField(max_length=128, unique=True,)
+    image_hash = models.CharField(max_length=64, )
+    indexed = models.BooleanField()
+    confirmed = models.BooleanField()
+    stored = models.BooleanField()
 
     def __str__(self):
         return '{}'.format(self.id)

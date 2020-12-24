@@ -14,10 +14,12 @@ class MasternodeSerializer(serializers.ModelSerializer):
         model = Masternode
         fields = ('ip', 'address', 'balance', 'pastelID')
 
+
 class RegticketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regticket
         fields = ('artist_pastelid', 'image_hash', 'status', 'created', 'masternode_pastelid')
+
 
 class ChunkSerializer(serializers.ModelSerializer):
     class Meta:

@@ -58,6 +58,7 @@ class MnAPITestCase(TestCase):
         self.assertEqual(Masternode.objects.first().ip, '127.0.0.1')
         self.assertEqual(Masternode.objects.first().pastelID, 'asdasd')
 
+
 class RegticketAPITestCase(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -66,79 +67,29 @@ class RegticketAPITestCase(TestCase):
     def test_create(self):
         masternode_pastelid = self.mn.pastelID
         r = self.client.post('/api/regticket/',
-                            data={"artist_pastelid":"alslr",
-                                  "status": "0",
-                                  "image_hash": "nl",
-                                  "masternode_pastelid": masternode_pastelid},
-                            content_type='application/json')
-        self.assertEqual(r.status_code, 200)
+                             data={"artist_pastelid": 12345,
+                                   "image_hash": 2,
+                                   "masternode_pastelid": masternode_pastelid,
+                                   "status": "0",
+                                   "created": "2020-12-24T08:40:47.443823Z"},
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 201)
         self.assertEqual(Regticket.objects.count(), 1)
-        self.assertEqual(Regticket.objects.first().image_hash, 'nl')
+        self.assertEqual(Regticket.objects.first().image_hash, "2")
 
     def test_no_masternode_pastelid(self):
+        masternode_pastelid = self.mn.pastelID
         r = self.client.post('/api/regticket/',
-                            data={"artist_pastelid":"alslr",
-                                  "status": "0",
-                                  "image_hash": "nl",
-                                  "masternode_pastelid": ""},
-                            content_type='application/json')
+                             data={"artist_pastelid": 12345,
+                                   "image_hash": 2,
+                                   # "masternode_pastelid": masternode_pastelid,
+                                   "status": "0",
+                                   "created": "2020-12-24T08:40:47.443823Z"},
+                             content_type='application/json')
         self.assertEqual(r.status_code, 400)
         self.assertEqual(Regticket.objects.count(), 0)
         self.assertEqual(r.json(), {'masternode_pastelid': ['This field is required.']})
 
-    def test_no_image_hash(self):
-        masternode_pastelid = self.mn.pastelID
-        r = self.client.post('/api/regticket/',
-                            data={"artist_pastelid":"alslr",
-                                  "status": "0",
-                                  "image_hash": "",
-                                  "masternode_pastelid": masternode_pastelid},
-                            content_type='application/json')
-        self.assertEqual(r.status_code, 400)
-        self.assertEqual(Regticket.objects.count(), 0)
-        self.assertEqual(r.json(), {'image_hash': ['This field is required.']})
-
-    def test_no_artist_pastelid(self):
-        masternode_pastelid = self.mn.pastelID
-        r = self.client.post('/api/regticket/',
-                            data={"artist_pastelid": "",
-                                  "status": "0",
-                                  "image_hash": "nl",
-                                  "masternode_pastelid": masternode_pastelid},
-                            content_type='application/json')
-        self.assertEqual(r.status_code, 400)
-        self.assertEqual(Regticket.objects.count(), 0)
-        self.assertEqual(r.json(), {'artist_pastelid': ['This field is required.']})
-
-    def test_masternode_does_not_exist(self):
-        r = self.client.post('/api/regticket/',
-                            data={"artist_pastelid": "alslr",
-                                  "status": "0",
-                                  "image_hash": "nl",
-                                  "masternode_pastelid": "sjdls"},
-                            content_type='application/json')
-        self.assertEqual(r.status_code, 400)
-        self.assertEqual(Regticket.objects.count(), 0)
-        self.assertEqual(r.json(), {'masternode_pastelid': ['DoesNotExist']})
-
-    def test_unique_image_hash(self):
-        masternode_pastelid = self.mn.pastelID
-        self.client.post('/api/regticket/',
-                            data={"artist_pastelid": "alslr",
-                                  "status": "0",
-                                  "image_hash": "nl",
-                                  "masternode_pastelid": masternode_pastelid},
-                            content_type='application/json')
-
-        r = self.client.post('/api/regticket/',
-                            data={"artist_pastelid":"alslsssss",
-                                  "status": "0",
-                                  "image_hash": "nl",
-                                  "masternode_pastelid": masternode_pastelid},
-                            content_type='application/json')
-        self.assertEqual(r.status_code, 400)
-        self.assertEqual(Regticket.objects.count(), 1)
-        self.assertEqual(r.json(), {'image_hash': ['Must be unique']})
 
 class ChunkAPITestCase(TestCase):
     def setUp(self) -> None:
@@ -155,33 +106,9 @@ class ChunkAPITestCase(TestCase):
                                    "confirmed": "True",
                                    "stored": "True"},
                              content_type='application/json')
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 201)
         self.assertEqual(Chunk.objects.count(), 1)
         self.assertEqual(Chunk.objects.first().mn_pastelid.pastelID, masternode_pastelid)
-
-
-    def test_unique_chunk_id(self):
-        masternode_pastelid = self.mn.pastelID
-        self.client.post('/api/chunk/',
-                             data={"mn_pastelid": masternode_pastelid,
-                                   "chunk_id": "efg",
-                                   "image_hash": "hijklmnop",
-                                   "indexed": "True",
-                                   "confirmed": "True",
-                                   "stored": "True"},
-                             content_type='application/json')
-
-        r = self.client.post('/api/chunk/',
-                             data={"mn_pastelid": masternode_pastelid,
-                                   "chunk_id": "efg",
-                                   "image_hash": "hijklmnop",
-                                   "indexed": "True",
-                                   "confirmed": "True",
-                                   "stored": "True"},
-                             content_type='application/json')
-        self.assertEqual(r.status_code, 400)
-        self.assertEqual(Chunk.objects.count(), 1)
-        self.assertEqual(r.json(), {'chunk_id': ['Must be unique']})
 
     def test_required_mn_pastelid(self):
         masternode_pastelid = self.mn.pastelID
@@ -196,7 +123,7 @@ class ChunkAPITestCase(TestCase):
 
         self.assertEqual(r.status_code, 400)
         self.assertEqual(Chunk.objects.count(), 0)
-        self.assertEqual(r.json(), {'chunk_id': ['This field is required.']})
+        self.assertEqual(r.json(), {'chunk_id': ['This field may not be blank.']})
 
     def test_not_boolean_indexed(self):
         masternode_pastelid = self.mn.pastelID
@@ -211,7 +138,7 @@ class ChunkAPITestCase(TestCase):
 
         self.assertEqual(r.status_code, 400)
         self.assertEqual(Chunk.objects.count(), 0)
-        self.assertEqual(r.json(), {'indexed': ["This field must be 'True' or 'False'"]})
+        self.assertEqual(r.json(),  {'indexed': ['Must be a valid boolean.']})
 
     def test_not_exist_pastelID(self):
         r = self.client.post('/api/chunk/',
@@ -225,4 +152,4 @@ class ChunkAPITestCase(TestCase):
 
         self.assertEqual(r.status_code, 400)
         self.assertEqual(Chunk.objects.count(), 0)
-        self.assertEqual(r.json(), {'masternode_pastelid': ['DoesNotExist']})
+        self.assertEqual(r.json(), {'mn_pastelid': ['Object with pastelID=abc does not exist.']})

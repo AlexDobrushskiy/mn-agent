@@ -60,7 +60,7 @@ def show_masternode_data(request):
     for mn in Masternode.objects.all():
         line = dict()
         for field in field_names:
-                line[field] = getattr(mn, field)
+            line[field] = getattr(mn, field)
         masternodes.append(line)
     context = {
         'masternodes': masternodes,

@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from model_mommy import mommy
 
-from main.models import Masternode, Regticket, Chunk
+from main.models import Masternode, Regticket, Chunk, MNConnection
 
 
 class MnAPITestCase(TestCase):
@@ -153,3 +153,102 @@ class ChunkAPITestCase(TestCase):
         self.assertEqual(r.status_code, 400)
         self.assertEqual(Chunk.objects.count(), 0)
         self.assertEqual(r.json(), {'mn_pastelid': ['Object with pastelID=abc does not exist.']})
+
+
+class MNConnectionAPITestCase(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+        self.mn = mommy.make(Masternode)
+
+    def test_list_create(self):
+        mn2 = mommy.make(Masternode)
+        masternode_pastelid = self.mn.pastelID
+        masternode_pastelid2 = mn2.pastelID
+        r = self.client.post('/api/mn_connection/',
+                             data=[{"ip": "127.0.0.1",
+                                    "active": "True",
+                                    "masternode_pastelid": masternode_pastelid,
+                                    "remote_pastelid": "e"},
+                                   {"ip": "127.0.0.2",
+                                    "active": "True",
+                                    "masternode_pastelid": masternode_pastelid2,
+                                    "remote_pastelid": "e"}],
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(MNConnection.objects.count(), 2)
+        self.assertEqual(MNConnection.objects.first().masternode_pastelid.pastelID, masternode_pastelid)
+        self.assertEqual(MNConnection.objects.first().ip, "127.0.0.1")
+
+    def test_list_update(self):
+        mn2 = mommy.make(Masternode)
+        masternode_pastelid = self.mn.pastelID
+        masternode_pastelid2 = mn2.pastelID
+        r = self.client.post('/api/mn_connection/',
+                             data=[{"ip": "127.0.0.1",
+                                    "active": "True",
+                                    "masternode_pastelid": masternode_pastelid,
+                                    "remote_pastelid": "e"},
+                                   {"ip": "127.0.0.2",
+                                    "active": "True",
+                                    "masternode_pastelid": masternode_pastelid2,
+                                    "remote_pastelid": "e"}],
+                             content_type='application/json')
+
+        r = self.client.post('/api/mn_connection/',
+                             data=[{"ip": "127.0.0.3",
+                                    "active": "True",
+                                    "masternode_pastelid": masternode_pastelid,
+                                    "remote_pastelid": "e"},
+                                   {"ip": "127.0.0.4",
+                                    "active": "True",
+                                    "masternode_pastelid": masternode_pastelid2,
+                                    "remote_pastelid": "e"}],
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(MNConnection.objects.count(), 2)
+        self.assertEqual(MNConnection.objects.first().masternode_pastelid.pastelID, masternode_pastelid)
+        self.assertEqual(MNConnection.objects.first().ip, "127.0.0.3")
+
+    def test_dict_create(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/mn_connection/',
+                             data={"ip": "127.0.0.2",
+                                   "active": "True",
+                                   "masternode_pastelid": masternode_pastelid,
+                                   "remote_pastelid": "e"},
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(MNConnection.objects.count(), 1)
+        self.assertEqual(MNConnection.objects.first().masternode_pastelid.pastelID, masternode_pastelid)
+        self.assertEqual(MNConnection.objects.first().ip, "127.0.0.2")
+
+    def test_dict_update(self):
+        masternode_pastelid = self.mn.pastelID
+        self.client.post('/api/mn_connection/',
+                             data={"ip": "127.0.0.2",
+                                   "active": "True",
+                                   "masternode_pastelid": masternode_pastelid,
+                                   "remote_pastelid": "e"},
+                             content_type='application/json')
+
+        r = self.client.post('/api/mn_connection/',
+                             data={"ip": "127.0.0.3",
+                                   "active": "True",
+                                   "masternode_pastelid": masternode_pastelid,
+                                   "remote_pastelid": "e"},
+                             content_type='application/json')
+
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(MNConnection.objects.count(), 1)
+        self.assertEqual(MNConnection.objects.first().masternode_pastelid.pastelID, masternode_pastelid)
+        self.assertEqual(MNConnection.objects.first().ip, "127.0.0.3")
+
+    def test_emty_ip(self):
+        masternode_pastelid = self.mn.pastelID
+        r = self.client.post('/api/mn_connection/',
+                             data={"ip": "",
+                                   "active": "True",
+                                   "masternode_pastelid": masternode_pastelid,
+                                   "remote_pastelid": "e"},
+                             content_type='application/json')
+        self.assertEqual(r.json(), {'ip': ['This field may not be blank.']})

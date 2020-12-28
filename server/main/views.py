@@ -1,13 +1,7 @@
-from datetime import datetime
-
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-from rest_framework import generics, serializers, status
+from rest_framework import generics, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.mixins import ListModelMixin
-import json
-from django.views.generic import UpdateView
 
 from main.models import Masternode, Regticket, Chunk, MNConnection
 
@@ -63,16 +57,15 @@ class ChunkApiView(generics.CreateAPIView):
         serializer_class.save()
 
 
-class MNConnectionApiView(generics.ListCreateAPIView):
+class MNConnectionApiView(generics.CreateAPIView):
     serializer_class = MNConnectionSerializer
     http_method_names = ['post']
 
     def create_or_update(self, data):
-        MNConnection.objects.update_or_create(ip=data['ip'],
-                                              masternode_pastelid=data['masternode_pastelid'],
-                                              active=data['active'],
-                                              remote_pastelid=data['remote_pastelid']
-                                              )
+        MNConnection.objects.update_or_create(masternode_pastelid=data['masternode_pastelid'],
+                                              defaults={'ip': "{}".format(data['ip']),
+                                              'active':'{}'.format(data['active']),
+                                              'remote_pastelid' :'{}'.format(data['remote_pastelid'])})
         return
 
     def data_to_list(self, connection_data):

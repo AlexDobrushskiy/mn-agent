@@ -47,3 +47,13 @@ class Chunk(models.Model):
 
     def __str__(self):
         return '{}'.format(self.id)
+
+
+class MNConnection(models.Model):
+    masternode_pastelid = models.ForeignKey(Masternode, on_delete=models.CASCADE, to_field='pastelID',)
+    ip = models.CharField(max_length=15)
+    remote_pastelid = models.CharField(max_length=64,)
+    active = models.BooleanField()
+
+    def __str__(self):
+        return '{}'.format(self.id)

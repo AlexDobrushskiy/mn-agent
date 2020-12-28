@@ -2,11 +2,14 @@ from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.mixins import ListModelMixin
+import json
+from django.views.generic import UpdateView
 
-from main.models import Masternode, Regticket, Chunk
+from main.models import Masternode, Regticket, Chunk, MNConnection
 
 
 class MasternodeSerializer(serializers.ModelSerializer):
@@ -25,6 +28,12 @@ class ChunkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chunk
         fields = ("mn_pastelid", "chunk_id", "image_hash", "indexed", "confirmed", "stored")
+
+
+class MNConnectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MNConnection
+        fields = ("masternode_pastelid", "ip", "remote_pastelid", "active")
 
 
 class MasternodeApiView(generics.UpdateAPIView):
@@ -52,6 +61,47 @@ class ChunkApiView(generics.CreateAPIView):
 
     def perform_create(self, serializer_class):
         serializer_class.save()
+
+
+class MNConnectionApiView(generics.ListCreateAPIView):
+    serializer_class = MNConnectionSerializer
+    http_method_names = ['post']
+
+    def create_or_update(self, data):
+        MNConnection.objects.update_or_create(ip=data['ip'],
+                                              masternode_pastelid=data['masternode_pastelid'],
+                                              active=data['active'],
+                                              remote_pastelid=data['remote_pastelid']
+                                              )
+        return
+
+    def data_to_list(self, connection_data):
+        req_data = {}
+        for connection_data_field in connection_data:
+            part_req_data = {connection_data_field: connection_data[str(connection_data_field)]}
+            if connection_data_field == 'masternode_pastelid':
+                part_req_data['masternode_pastelid'] = connection_data['masternode_pastelid'].pastelID
+            req_data |= part_req_data
+        return req_data
+
+    def post(self, data):
+        if str(type(self.request.data)) == "<class 'list'>":
+            serializer = self.get_serializer(data=self.request.data, many=isinstance(self.request.data, list))
+            serializer.is_valid(raise_exception=True)
+            for val_data in serializer.validated_data:
+                self.create_or_update(val_data)
+            list_req_data = []
+            for connection_data in serializer.validated_data:
+                req_data = self.data_to_list(connection_data)
+                list_req_data.append(req_data)
+            return Response(list_req_data)
+        else:
+            serializer = MNConnectionSerializer(data=self.request.data)
+            serializer.is_valid(raise_exception=True)
+            self.create_or_update(serializer.validated_data)
+            connection_data = serializer.validated_data
+            req_data = self.data_to_list(connection_data)
+            return Response(req_data)
 
 
 def show_masternode_data(request):

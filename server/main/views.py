@@ -76,16 +76,18 @@ class MNConnectionApiView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        return
+        return serializer.data
 
     def create(self, request, *args, **kwargs):
         many = isinstance(request.data, list)
         if many:
+            result = []
             for data in request.data:
-                self.create_or_update(data)
+                serializer_part = self.create_or_update(data)
+                result.append(serializer_part)
         else:
-            self.create_or_update(request.data)
-        return Response('ok', status=status.HTTP_200_OK)
+            result = self.create_or_update(request.data)
+        return Response(result, status=status.HTTP_200_OK)
 
 
 def show_masternode_data(request):

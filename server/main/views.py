@@ -74,7 +74,7 @@ class MNConnectionApiView(generics.CreateAPIView):
             part_req_data = {connection_data_field: connection_data[str(connection_data_field)]}
             if connection_data_field == 'masternode_pastelid':
                 part_req_data['masternode_pastelid'] = connection_data['masternode_pastelid'].pastelID
-            req_data |= part_req_data
+            req_data.update(part_req_data)
         return req_data
 
     def post(self, data):

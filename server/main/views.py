@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
@@ -62,39 +62,30 @@ class MNConnectionApiView(generics.CreateAPIView):
     http_method_names = ['post']
 
     def create_or_update(self, data):
-        MNConnection.objects.update_or_create(masternode_pastelid=data['masternode_pastelid'],
-                                              defaults={'ip': "{}".format(data['ip']),
-                                              'active':'{}'.format(data['active']),
-                                              'remote_pastelid' :'{}'.format(data['remote_pastelid'])})
+        serializer = self.get_serializer(data=data)
+        count = MNConnection.objects.filter(masternode_pastelid=data['masternode_pastelid'],
+                                            remote_pastelid=data['remote_pastelid']).count()
+        if count == 0:
+            # create
+            serializer.instance = None
+        else:
+            # update
+            serializer.instance = MNConnection.objects.get(masternode_pastelid=data['masternode_pastelid'],
+                                            remote_pastelid=data['remote_pastelid'])
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
         return
 
-    def data_to_list(self, connection_data):
-        req_data = {}
-        for connection_data_field in connection_data:
-            part_req_data = {connection_data_field: connection_data[str(connection_data_field)]}
-            if connection_data_field == 'masternode_pastelid':
-                part_req_data['masternode_pastelid'] = connection_data['masternode_pastelid'].pastelID
-            req_data.update(part_req_data)
-        return req_data
-
-    def post(self, data):
-        if str(type(self.request.data)) == "<class 'list'>":
-            serializer = self.get_serializer(data=self.request.data, many=isinstance(self.request.data, list))
-            serializer.is_valid(raise_exception=True)
-            for val_data in serializer.validated_data:
-                self.create_or_update(val_data)
-            list_req_data = []
-            for connection_data in serializer.validated_data:
-                req_data = self.data_to_list(connection_data)
-                list_req_data.append(req_data)
-            return Response(list_req_data)
+    def create(self, request, *args, **kwargs):
+        many = isinstance(request.data, list)
+        if many:
+            for data in request.data:
+                self.create_or_update(data)
         else:
-            serializer = MNConnectionSerializer(data=self.request.data)
-            serializer.is_valid(raise_exception=True)
-            self.create_or_update(serializer.validated_data)
-            connection_data = serializer.validated_data
-            req_data = self.data_to_list(connection_data)
-            return Response(req_data)
+            self.create_or_update(request.data)
+        return Response('ok', status=status.HTTP_200_OK)
 
 
 def show_masternode_data(request):

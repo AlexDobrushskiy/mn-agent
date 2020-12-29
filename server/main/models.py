@@ -55,5 +55,8 @@ class MNConnection(models.Model):
     remote_pastelid = models.CharField(max_length=64,)
     active = models.BooleanField()
 
+    class Meta:
+        unique_together = ('masternode_pastelid', 'remote_pastelid',)
+
     def __str__(self):
         return '{}'.format(self.id)

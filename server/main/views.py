@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework import generics, serializers, status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from main.models import Masternode, Regticket, Chunk, MNConnection
@@ -41,6 +43,14 @@ class MasternodeApiView(generics.UpdateAPIView):
             raise ValidationError({'ip': ["This field is required."]})
         obj, created = Masternode.objects.get_or_create(ip=ip)
         return obj
+
+
+class MasternodeUIApiView(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = (IsAuthenticated,)
+    serializer_class = MasternodeSerializer
+    model = serializer_class.Meta.model
+    queryset = model.objects.all()
 
 
 class RegticketApiView(generics.CreateAPIView):

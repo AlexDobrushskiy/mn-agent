@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from model_mommy import mommy
-
+from django.contrib.auth.models import User
 from main.models import Masternode, Regticket, Chunk, MNConnection
 
 
@@ -252,3 +252,35 @@ class MNConnectionAPITestCase(TestCase):
                                    "remote_pastelid": "e"},
                              content_type='application/json')
         self.assertEqual(r.json(), {'ip': ['This field may not be blank.']})
+
+
+class MasternodeUIAPITestCase(TestCase):
+    def setUp(self) -> None:
+        self.user = mommy.make(User)
+        user = User.objects.create(username='testuser')
+        user.set_password('12345')
+        user.save()
+        self.client.login(username='testuser', password='12345')
+        token = self.client.post('/api/token-auth/',
+                                      data={
+                                        "username": 'testuser',
+                                        "password": '12345'
+                                      },
+                                      content_type='application/json')
+        self.client = Client(HTTP_AUTHORIZATION='Token ' + token.json()['token'])
+        self.mn = mommy.make(Masternode)
+        mommy.make(Masternode, _quantity=2)
+
+    def test_get(self):
+        r = self.client.get('/api/ui/masternode/',
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.json()), 3)
+        self.assertEqual(r.json()[0]['ip'], self.mn.ip)
+
+    def test_no_token(self):
+        self.client = Client()
+        r = self.client.get('/api/ui/masternode/',
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 401)
+        self.assertEqual(r.json(), {'detail': 'Authentication credentials were not provided.'})

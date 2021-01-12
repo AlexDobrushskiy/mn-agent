@@ -25,7 +25,6 @@ if __name__ == '__main__':
                 "address": address,
                 "balance": balance,
                 "pastelID": pastelid}
-        headers = {'X-CSRFToken': 'csrftoken'}
-        s = requests.put(url, data=json.dumps(data), headers=headers)
+        s = requests.put(url, data=json.dumps(data))
         print(s.text)
 

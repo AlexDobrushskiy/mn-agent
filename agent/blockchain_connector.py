@@ -59,3 +59,6 @@ class BlockChain:
 
     def getaccountaddress(self):
         return self.__call_jsonrpc("getaccountaddress", "")
+
+    def getpastelidlist(self):
+        return self.__call_jsonrpc("pastelid", "list")

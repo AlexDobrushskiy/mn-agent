@@ -14,7 +14,7 @@ class MnAPITestCase(TestCase):
                             content_type='application/json')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Masternode.objects.count(), 1)
-        self.assertEqual(Masternode.objects.first().ip, '127.0.0.1')
+        self.assertEqual(Masternode.objects.first().address, '127.0.0.1')
 
     def test_update_mn(self):
         mn = mommy.make(Masternode)

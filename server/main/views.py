@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, serializers, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
@@ -35,6 +37,10 @@ class MNConnectionSerializer(serializers.ModelSerializer):
 class MasternodeApiView(generics.UpdateAPIView):
     serializer_class = MasternodeSerializer
     http_method_names = ['put']
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(MasternodeApiView, self).dispatch(request, *args, **kwargs)
 
     def get_object(self):
         # TODO: validate if client's IP equal to this IP in parameters

@@ -1,7 +1,6 @@
 import time
 from blockchain_connector import BlockChain
 import requests
-import json
 
 blockchain = BlockChain()
 
@@ -14,18 +13,10 @@ if __name__ == '__main__':
         try:
             pastelid = blockchain.getpastelidlist()[0]['pastelID']
         except:
-            print('pastelID does not exist')
-            pastelid = 'asda'
-        # print(balance)
-        # print(address)
-        # print(MY_IP)
-        # print(blockchain.help())
+            pastelid = 'pastelID does not exist'
         url = ' http://dobrushskiy.name:8020/api/masternode'
         data = {"ip": MY_IP,
                 "address": address,
                 "balance": balance,
                 "pastelID": pastelid}
-        # print(data)
-        s = requests.put(url, data=data)
-        print(s.text)
-
+        r = requests.put(url, data=data)

@@ -34,7 +34,6 @@ class MNConnectionSerializer(serializers.ModelSerializer):
         fields = ("masternode_pastelid", "ip", "remote_pastelid", "active")
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class MasternodeApiView(generics.UpdateAPIView):
     serializer_class = MasternodeSerializer
     http_method_names = ['put']

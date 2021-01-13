@@ -39,6 +39,18 @@ class Regticket(Model):
         database = MASTERNODE_DB
         table_name = 'regticket'
 
+class Chunk(Model):
+    chunk_id = CharField(unique=True)
+    image_hash = BlobField()
+    indexed = BooleanField(default=False)  # to track fresh added chunks, and calculate XOR distances for them.
+    confirmed = BooleanField(default=False)  # indicates if chunk ID is contained in one of confirmed registration tickets
+    stored = BooleanField(default=False)
+
+    class Meta:
+        database = MASTERNODE_DB
+        table_name = 'chunk'
+
+
 blockchain = BlockChain()
 
 if __name__ == '__main__':
@@ -84,8 +96,40 @@ if __name__ == '__main__':
         r = requests.post(url, data=data)
         print(r.text)
 
+    def send_chunks(last_chunk_id):
+        all_chunks = Chunk.select()
+        new_chunk_id = last_chunk_id
+        for db_data in all_chunks:
+            if db_data.id > last_chunk_id:
+                send_chunk(db_data)
+                new_chunk_id = db_data.id
+        return new_chunk_id
+
+    def send_chunk(db_data):
+        mn_pastelid = blockchain.getaccountaddress()
+        chunk_id = db_data.chunk_id
+        image_hash = db_data.image_hash
+        indexed = db_data.indexed
+        confirmed = db_data.confirmed
+        stored = db_data.stored
+        # send data
+        url = ' http://dobrushskiy.name:8020/api/chunk'
+        data = {"mn_pastelid": mn_pastelid,
+                "chunk_id": chunk_id,
+                "image_hash": image_hash,
+                "indexed": indexed,
+                "confirmed": confirmed,
+                "stored": stored}
+        r = requests.post(url, data=data)
+        print(r.text)
+
     last_regticket_id = 0
+    last_chunk_id = 0
     while True:
         time.sleep(3)
+        # masternode
         send_masternode()
+        # regticket
         last_regticket_id = send_regtickets(last_regticket_id)
+        # chunck
+        last_chunk_id = send_chunks(last_chunk_id)

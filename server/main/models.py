@@ -36,7 +36,7 @@ class Regticket(models.Model):
 
 class Chunk(models.Model):
     mn_pastelid = models.ForeignKey(Masternode, on_delete=models.CASCADE, to_field='pastelID',)
-    chunk_id = models.CharField(max_length=128,)
+    chunk_id = models.CharField(max_length=256,)
     image_hash = models.CharField(max_length=64,)
     indexed = models.BooleanField()
     confirmed = models.BooleanField()

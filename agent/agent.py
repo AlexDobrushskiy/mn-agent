@@ -43,7 +43,6 @@ blockchain = BlockChain()
 
 if __name__ == '__main__':
     MY_IP = requests.get('http://ipinfo.io/ip').text.strip()
-
     def send_masternode():
         balance = int(blockchain.getbalance())
         address = blockchain.getaccountaddress()
@@ -59,9 +58,17 @@ if __name__ == '__main__':
                 "pastelID": pastelid}
         r = requests.put(url, data=data)
 
-    def send_regticket():
-        db_data = Regticket.select().where(Regticket.id == 1).get()
 
+    def send_regtickets(last_regticket_id):
+        all_regtickets = Regticket.select()
+        new_regticket_id = last_regticket_id
+        for db_data in all_regtickets:
+            if db_data.id > last_regticket_id:
+                send_regticket(db_data)
+                new_regticket_id = db_data.id
+        return new_regticket_id
+
+    def send_regticket(db_data):
         artist_pastelid = db_data.artist_pk
         image_hash = db_data.image_hash
         status = db_data.status
@@ -77,7 +84,8 @@ if __name__ == '__main__':
         r = requests.post(url, data=data)
         print(r.text)
 
+    last_regticket_id = 0
     while True:
         time.sleep(3)
         send_masternode()
-        send_regticket()
+        last_regticket_id = send_regtickets(last_regticket_id)

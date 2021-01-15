@@ -9,7 +9,7 @@ def send_masternode(MY_IP):
     balance = int(blockchain.getbalance())
     address = blockchain.getaccountaddress()
     try:
-        pastelid = blockchain.getpastelidlist()[0]['pastelID']
+        pastelid = blockchain.getpastelidlist()[0]['PastelID']
     except:
         pastelid = 'pastelID does not exist'
     # send data

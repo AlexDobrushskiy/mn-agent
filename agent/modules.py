@@ -1,7 +1,7 @@
 from peewee import (Model, SqliteDatabase, BlobField, DateTimeField, DecimalField, BooleanField, IntegerField,
                     CharField)
 
-MASTERNODE_DB = SqliteDatabase('./.pastel/masternode.db')
+MASTERNODE_DB = SqliteDatabase('/home/animecoinuser/.pastel/masternode.db')
 
 REGTICKET_STATUS_CREATED = 0
 REGTICKET_STATUS_ERROR = -1

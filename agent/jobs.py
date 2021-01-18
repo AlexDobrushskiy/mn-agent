@@ -36,7 +36,7 @@ def send_regticket(db_data):
     image_hash = db_data.image_hash
     status = db_data.status
     created = db_data.created
-    masternode_pastelid = blockchain.getaccountaddress()
+    masternode_pastelid = blockchain.getpastelidlist()[0]['PastelID']
     # send data
     url = 'http://dobrushskiy.name:8020/api/regticket'
     data = {"artist_pastelid": artist_pastelid,
@@ -60,7 +60,7 @@ def send_chunks(last_chunk_id):
 
 
 def send_chunk(db_data):
-    mn_pastelid = blockchain.getaccountaddress()
+    mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
     chunk_id = db_data.chunk_id
     image_hash = db_data.image_hash
     indexed = db_data.indexed

@@ -64,4 +64,4 @@ jobs:
             docker pull docker.pkg.github.com/alexdobrushskiy/mn-agent/server:latest
             docker container stop `cat .mn-server-container-id`
             docker container rm `cat .mn-server-container-id`
-            docker run -d -p 8020:8020  -e DJANGO_SUPERUSER_USERNAME=${{ secrets.DEPLOY_USERNAME }} -e DJANGO_SUPERUSER_PASSWORD=${{ secrets.DEPLOY_PASSWORD }} -e DJANGO_SUPERUSER_EMAIL=${{ secrets.DEPLOY_EMAIL }} docker.pkg.github.com/alexdobrushskiy/mn-agent/server:latest > .mn-server-container-id
+            docker run -d -p 8020:8020  -e DJANGO_SUPERUSER_USERNAME=${{ secrets.DEPLOY_USERNAME }} -e DJANGO_SUPERUSER_PASSWORD=${{ secrets.DEPLOY_PASSWORD }} -e DJANGO_SUPERUSER_EMAIL=${{ secrets.DEPLOY_EMAIL }} -v /root/mn_agent_server_db:/opt/app/server/container_db docker.pkg.github.com/alexdobrushskiy/mn-agent/server:latest > .mn-server-container-id

@@ -1,0 +1,68 @@
+<html>
+<head>
+    <style>
+        div {
+            width: 100%;
+            text-align: center;
+        }
+        thead {
+            font-family: "Roboto", sans-serif;
+            font-size: 16px;
+            color: #a0a0a0;
+        }
+        td {
+            padding: 5px;
+            border: 1px dotted grey;
+        }
+        table {
+            margin: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+    <body>
+        <div>
+            <h1>masternode id: {{ mn_id }} </h1>
+            <p>ip: {{masternode.ip}}</p>
+            <p>pastel id: {{masternode.pastelID}}</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    {% for field in regticket_fields %}
+                        <td>{{ field }}</td>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for regticket in regtickets %}
+                    <tr>
+                    {% for k, v in regticket.items %}
+                        <td>{{ v }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    {% for field in chunk_fields %}
+                        <td>{{ field }}</td>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for chunk in chunks %}
+                    <tr>
+                    {% for k, v in chunk.items %}
+                        <td>{{ v }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
+</html>

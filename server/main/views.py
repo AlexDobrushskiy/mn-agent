@@ -115,3 +115,34 @@ def show_masternode_data(request):
         'fields': field_names
     }
     return render(request, 'mn_data.html', context=context)
+
+def show_single_masternode_data(request, mn_id):
+    masternode = Masternode.objects.get(id=mn_id)
+
+    chunk_fields = ['chunk_id', 'image_hash', 'indexed', 'confirmed', 'stored']
+    chunks = []
+    for chunk in Chunk.objects.filter(mn_pastelid=masternode):
+        line = dict()
+        for field in chunk_fields:
+            line[field] = getattr(chunk, field)
+        chunks.append(line)
+    # chunks = Chunk.objects.filter(mn_pastelid=masternode)
+    # chunk_fields = ['mn_pastelid', 'chunk_id', 'image_hash', 'indexed', 'confirmed', 'stored']
+
+    regticket_fields = ['artist_pastelid', 'image_hash', 'status', 'created']
+    regtickets = []
+    for regticket in Regticket.objects.filter(masternode_pastelid=masternode):
+        line = dict()
+        for field in chunk_fields:
+            line[field] = getattr(regticket, field)
+        regtickets.append(line)
+
+    context = {
+        'masternode': masternode,
+        'mn_id': mn_id,
+        'chunks': chunks,
+        'chunk_fields': chunk_fields,
+        'regtickets': regtickets,
+        'regticket_fields': regticket_fields
+    }
+    return render(request, 'single_mn_data.html', context=context)

@@ -29,7 +29,11 @@
                 {% for masternode in masternodes %}
                     <tr>
                     {% for k, v in masternode.items %}
-                        <td>{{ v }}</td>
+                        {% if k == "ip" %}
+                            <td><a href="{{ masternode.id }}">{{ v }}</a></td>
+                        {% else %}
+                            <td>{{ v }}</td>
+                        {% endif %}
                     {% endfor %}
                     </tr>
                 {% endfor %}

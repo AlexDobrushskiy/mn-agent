@@ -126,8 +126,6 @@ def show_single_masternode_data(request, mn_id):
         for field in chunk_fields:
             line[field] = getattr(chunk, field)
         chunks.append(line)
-    # chunks = Chunk.objects.filter(mn_pastelid=masternode)
-    # chunk_fields = ['mn_pastelid', 'chunk_id', 'image_hash', 'indexed', 'confirmed', 'stored']
 
     regticket_fields = ['artist_pastelid', 'image_hash', 'status', 'created']
     regtickets = []
@@ -137,12 +135,22 @@ def show_single_masternode_data(request, mn_id):
             line[field] = getattr(regticket, field)
         regtickets.append(line)
 
+    connection_fields = ['ip', 'remote_pastelid', 'active']
+    connections = []
+    for connection in MNConnection.objects.filter(masternode_pastelid=masternode):
+        line = dict()
+        for field in connection_fields:
+            line[field] = getattr(connection, field)
+        connections.append(line)
+
     context = {
         'masternode': masternode,
         'mn_id': mn_id,
         'chunks': chunks,
         'chunk_fields': chunk_fields,
         'regtickets': regtickets,
-        'regticket_fields': regticket_fields
+        'regticket_fields': regticket_fields,
+        'connections': connections,
+        'connection_fields': connection_fields
     }
     return render(request, 'single_mn_data.html', context=context)

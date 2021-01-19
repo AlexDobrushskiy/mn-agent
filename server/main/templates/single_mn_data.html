@@ -64,5 +64,24 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <table>
+            <thead>
+                <tr>
+                    {% for field in connection_fields %}
+                        <td>{{ field }}</td>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for connection in connections %}
+                    <tr>
+                    {% for k, v in connection.items %}
+                        <td>{{ v }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </body>
 </html>

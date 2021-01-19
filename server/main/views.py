@@ -133,7 +133,7 @@ def show_single_masternode_data(request, mn_id):
     regtickets = []
     for regticket in Regticket.objects.filter(masternode_pastelid=masternode):
         line = dict()
-        for field in chunk_fields:
+        for field in regticket_fields:
             line[field] = getattr(regticket, field)
         regtickets.append(line)
 

@@ -8,6 +8,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 
 RUN mkdir -p /opt/app
 RUN mkdir -p /opt/app/server
+RUN mkdir -p /opt/app/server/container_db
 RUN chown -R www-data:www-data /opt/app/server/
 COPY server /opt/app/server
 COPY start-server.sh /opt/app/server/start-server.sh

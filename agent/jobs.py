@@ -79,7 +79,7 @@ def send_chunk(db_data):
 
 def mn_connections():
     connections = blockchain.getpeerinfo()
-    data = {}
+    data = []
     mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
     for connection in connections:
         ip = connection['addr']
@@ -89,13 +89,13 @@ def mn_connections():
             if masternode.ext_address.split(':')[0] == clear_ip:
                 pastelid = masternode.pastel_id
                 active = masternode.active
-        part = {'masternode_pastelid': mn_pastelid,
-                'ip': ip,
-                'remote_pastelid': pastelid,
-                'active': active}
-        data.update(part)
+                part = {'masternode_pastelid': mn_pastelid,
+                        'ip': clear_ip,
+                        'remote_pastelid': pastelid,
+                        'active': active}
+                data.append(part)
 
-    # send data
+    # print(data)
     url = 'http://dobrushskiy.name:8020/api/mn_connection'
-    r = requests.post(url, data=data)
+    r = requests.post(url, json=data)
     print(r.text)

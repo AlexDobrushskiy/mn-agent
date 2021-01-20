@@ -1,6 +1,6 @@
 import time
 from blockchain_connector import BlockChain
-from jobs import send_masternode, send_regtickets, send_chunks
+from jobs import send_masternode, send_regtickets, send_chunks, mn_connections
 import requests
 import logging
 
@@ -21,3 +21,5 @@ if __name__ == '__main__':
         last_regticket_id = send_regtickets(last_regticket_id)
         # chunck
         last_chunk_id = send_chunks(last_chunk_id)
+        # connections
+        mn_connections()

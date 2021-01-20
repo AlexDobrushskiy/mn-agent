@@ -1,7 +1,7 @@
 import logging
 from blockchain_connector import BlockChain
 import requests
-from modules import Regticket, Chunk
+from modules import Regticket, Chunk, Masternode
 
 blockchain = BlockChain()
 
@@ -46,7 +46,7 @@ def send_regticket(db_data):
             "masternode_pastelid": masternode_pastelid}
     r = requests.post(url, data=data)
     logging.info('regticket')
-    print(r.text)
+    # print(r.text)
 
 
 def send_chunks(last_chunk_id):
@@ -74,5 +74,28 @@ def send_chunk(db_data):
             "indexed": indexed,
             "confirmed": confirmed,
             "stored": stored}
+    r = requests.post(url, data=data)
+    # print(r.text)
+
+def mn_connections():
+    connections = blockchain.getpeerinfo()
+    data = {}
+    mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
+    for connection in connections:
+        ip = connection['addr']
+        clear_ip = ip.split(':')[0]
+        masternodes = Masternode.select()
+        for masternode in masternodes:
+            if masternode.ext_address.split(':')[0] == clear_ip:
+                pastelid = masternode.pastel_id
+                active = masternode.active
+        part = {'masternode_pastelid': mn_pastelid,
+                'ip': ip,
+                'remote_pastelid': pastelid,
+                'active': active}
+        data.update(part)
+
+    # send data
+    url = 'http://dobrushskiy.name:8020/api/mn_connection'
     r = requests.post(url, data=data)
     print(r.text)

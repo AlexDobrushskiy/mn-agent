@@ -45,3 +45,12 @@ class Chunk(Model):
     class Meta:
         database = MASTERNODE_DB
         table_name = 'chunk'
+
+class Masternode(Model):
+    ext_address = CharField(unique=True)  # ip:port
+    pastel_id = CharField(unique=True)
+    active = BooleanField(default=True)  # optionally disable masternode
+
+    class Meta:
+        database = MASTERNODE_DB
+        table_name = 'masternode'

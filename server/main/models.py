@@ -52,7 +52,7 @@ class Chunk(models.Model):
 class MNConnection(models.Model):
     masternode_pastelid = models.ForeignKey(Masternode, on_delete=models.CASCADE, to_field='pastelID',)
     ip = models.CharField(max_length=15)
-    remote_pastelid = models.CharField(max_length=64,)
+    remote_pastelid = models.CharField(max_length=86,)
     active = models.BooleanField()
 
     class Meta:

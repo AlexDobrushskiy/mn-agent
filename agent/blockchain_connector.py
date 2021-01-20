@@ -62,3 +62,6 @@ class BlockChain:
 
     def getpastelidlist(self):
         return self.__call_jsonrpc("pastelid", "list")
+
+    def getpeerinfo(self):
+        return self.__call_jsonrpc("getpeerinfo")

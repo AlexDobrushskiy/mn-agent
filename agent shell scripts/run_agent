@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source /home/animecoinuser/env/bin/activate
+rm -rf agent
+tar -xzvf agent.tar.gz
+cd agent
+nohup python3 agent.py & echo $! > run.pid

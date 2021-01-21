@@ -1,0 +1,30 @@
+#!/bin/bash
+
+cd Desktop
+rm agent.tar.gz
+cd blockchain
+tar -czvf agent.tar.gz agent
+mv agent.tar.gz ../
+cd ../
+scp ~/Desktop/agent.tar.gz animecoinuser@51.15.41.129:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.15.79.175:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.15.83.99:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.158.176.36:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.158.188.130:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.15.109.152:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.158.183.93:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.158.167.70:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.15.116.190:~/
+scp ~/Desktop/agent.tar.gz animecoinuser@51.15.38.6:~/
+osascript -e 'tell app "Terminal"
+    do script "ssh animecoinuser@51.15.41.129 \"source run_agent\""
+    do script "ssh animecoinuser@51.15.79.175 \"source run_agent\""
+    do script "ssh animecoinuser@51.15.83.99 \"source run_agent\""
+    do script "ssh animecoinuser@51.158.176.36 \"source run_agent\""
+    do script "ssh animecoinuser@51.158.188.130 \"source run_agent\""
+    do script "ssh animecoinuser@51.15.109.152 \"source run_agent\""
+    do script "ssh animecoinuser@51.158.183.93 \"source run_agent\""
+    do script "ssh animecoinuser@51.158.167.70 \"source run_agent\""
+    do script "ssh animecoinuser@51.15.116.190 \"source run_agent\""
+    do script "ssh animecoinuser@51.15.38.6 \"source run_agent\""
+end tell'

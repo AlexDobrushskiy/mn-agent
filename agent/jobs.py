@@ -1,7 +1,7 @@
 import logging
 from blockchain_connector import BlockChain
 import requests
-from modules import Regticket, Chunk, Masternode
+from models import Regticket, Chunk, Masternode
 
 blockchain = BlockChain()
 

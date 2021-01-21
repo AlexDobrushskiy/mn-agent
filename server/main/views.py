@@ -133,7 +133,13 @@ def show_single_masternode_data(request, mn_id):
         line = dict()
         for field in regticket_fields:
             line[field] = getattr(regticket, field)
+        qs_masternodes = Regticket.objects.filter(image_hash=regticket.image_hash)
+        value = ''
+        for mn in qs_masternodes:
+            value = value + str(mn.masternode_pastelid) + '; '
+        line['masternodes'] = value
         regtickets.append(line)
+    regticket_fields.append('masternodes')
 
     connection_fields = ['ip', 'remote_pastelid', 'active']
     connections = []

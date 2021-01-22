@@ -109,7 +109,11 @@ def show_masternode_data(request):
         line = dict()
         for field in field_names:
             line[field] = getattr(mn, field)
+        line['count chuncks'] = Chunk.objects.filter(mn_pastelid=mn).count()
+        line['count regtickets'] = Regticket.objects.filter(masternode_pastelid=mn).count()
         masternodes.append(line)
+    field_names.append('count chuncks')
+    field_names.append('count regtickets')
     context = {
         'masternodes': masternodes,
         'fields': field_names

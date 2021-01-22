@@ -1,0 +1,58 @@
+name: Deploy Agents
+
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: agent
+
+jobs:
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  deploy:
+    runs-on: ubuntu-latest
+#    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file agent.Dockerfile --tag $IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+      - name: Deploy to instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            docker pull docker.pkg.github.com/alexdobrushskiy/mn-agent/agent:latest
+            docker container stop `cat .mn-agent-container-id`
+            docker container rm `cat .mn-agent-container-id`
+            docker run -d -p 8020:8020  -e DJANGO_SUPERUSER_USERNAME=${{ secrets.DEPLOY_USERNAME }} -e DJANGO_SUPERUSER_PASSWORD=${{ secrets.DEPLOY_PASSWORD }} -e DJANGO_SUPERUSER_EMAIL=${{ secrets.DEPLOY_EMAIL }} -v /root/mn_agent_server_db:/opt/app/server/container_db docker.pkg.github.com/alexdobrushskiy/mn-agent/server:latest > .mn-agent-container-id

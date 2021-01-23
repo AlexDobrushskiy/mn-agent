@@ -1,0 +1,23 @@
+name: Test Agents connect
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  deploy:
+    runs-on: ubuntu-latest
+#    if: github.event_name == 'push'
+
+    steps:
+      - name: Deploy to instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AGENT_HOSTS }}
+          username: ${{ secrets.DEPLOY_AGENT_USERNAME }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            touch /home/animecoinuser/connect_OK.ok

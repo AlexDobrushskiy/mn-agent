@@ -5,7 +5,7 @@ from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 
 
 class BlockChain:
-    def __init__(self, user='rt', password='rt', ip='127.0.0.1', rpcport=19932):
+    def __init__(self, user='rt', password='rt', ip='host.docker.internal', rpcport=19932):
         self.url = "http://%s:%s@%s:%s" % (user, password, ip, rpcport)
         self.__reconnect()
 

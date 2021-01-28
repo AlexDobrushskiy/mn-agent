@@ -18,8 +18,8 @@ if __name__ == '__main__':
         # masternode
         send_masternode(MY_IP)
         # regticket
-        # last_regticket_id = send_regtickets(last_regticket_id)
+        last_regticket_id = send_regtickets(last_regticket_id)
         # chunck
-        # last_chunk_id = send_chunks(last_chunk_id)
+        last_chunk_id = send_chunks(last_chunk_id)
         # connections
-        # mn_connections()
+        mn_connections()

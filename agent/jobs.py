@@ -2,8 +2,17 @@ import logging
 from blockchain_connector import BlockChain
 import requests
 from models import Regticket, Chunk, Masternode
+import os
 
 blockchain = BlockChain()
+
+dns_name = "dobrushskiy.name"
+port = '8020'
+if os.environ.get('CUSTOM_DNS_NAME') is not None:
+    if os.environ.get('CUSTOM_PORT') is not None:
+        dns_name = os.environ.get('CUSTOM_DNS_NAME')
+        port = os.environ.get('CUSTOM_PORT')
+
 
 def send_masternode(MY_IP):
     balance = int(blockchain.getbalance())
@@ -13,7 +22,7 @@ def send_masternode(MY_IP):
     except:
         pastelid = 'pastelID does not exist'
     # send data
-    url = 'http://dobrushskiy.name:8020/api/masternode'
+    url = 'http://{}:{}/api/masternode'.format(dns_name, port)
     data = {"ip": MY_IP,
             "address": address,
             "balance": balance,
@@ -36,9 +45,12 @@ def send_regticket(db_data):
     image_hash = db_data.image_hash
     status = db_data.status
     created = db_data.created
-    masternode_pastelid = blockchain.getpastelidlist()[0]['PastelID']
+    try:
+        masternode_pastelid = blockchain.getpastelidlist()[0]['PastelID']
+    except:
+        masternode_pastelid = 'pastelID does not exist'
     # send data
-    url = 'http://dobrushskiy.name:8020/api/regticket'
+    url = 'http://{}:{}/api/regticket'.format(dns_name, port)
     data = {"artist_pastelid": artist_pastelid,
             "image_hash": image_hash,
             "status": status,
@@ -60,14 +72,17 @@ def send_chunks(last_chunk_id):
 
 
 def send_chunk(db_data):
-    mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
     chunk_id = db_data.chunk_id
     image_hash = db_data.image_hash
     indexed = db_data.indexed
     confirmed = db_data.confirmed
     stored = db_data.stored
+    try:
+        mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
+    except:
+        mn_pastelid = 'pastelID does not exist'
     # send data
-    url = 'http://dobrushskiy.name:8020/api/chunk'
+    url = 'http://{}:{}/api/chunk'.format(dns_name, port)
     data = {"mn_pastelid": mn_pastelid,
             "chunk_id": chunk_id,
             "image_hash": image_hash,
@@ -80,7 +95,10 @@ def send_chunk(db_data):
 def mn_connections():
     connections = blockchain.getpeerinfo()
     data = []
-    mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
+    try:
+        mn_pastelid = blockchain.getpastelidlist()[0]['PastelID']
+    except:
+        mn_pastelid = 'pastelID does not exist'
     for connection in connections:
         ip = connection['addr']
         clear_ip = ip.split(':')[0]
@@ -96,6 +114,6 @@ def mn_connections():
                 data.append(part)
 
     # print(data)
-    url = 'http://dobrushskiy.name:8020/api/mn_connection'
+    url = 'http://{}:{}/api/mn_connection'.format(dns_name, port)
     r = requests.post(url, json=data)
     print(r.text)

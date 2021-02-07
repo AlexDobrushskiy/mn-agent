@@ -52,7 +52,7 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.DEPLOY_PORT }}
           script: |
-            ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
             docker pull docker.pkg.github.com/alexdobrushskiy/mn-agent/agent:latest
             [ -f ".mn-agent-container-id" ] && docker container stop `cat .mn-agent-container-id`
             [ -f ".mn-agent-container-id" ] && docker container rm `cat .mn-agent-container-id`

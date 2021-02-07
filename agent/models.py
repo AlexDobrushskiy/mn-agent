@@ -11,6 +11,7 @@ REGTICKET_STATUS_CHOICES = ((REGTICKET_STATUS_CREATED, 'Created'),
                             (REGTICKET_STATUS_ERROR, 'Error'),
                             (REGTICKET_STATUS_PLACED_ON_BLOCKCHAIN, 'Placed on blockchain'),)
 
+
 class Regticket(Model):
     upload_code = BlobField(unique=True, null=True)
     regticket = BlobField()
@@ -35,6 +36,7 @@ class Regticket(Model):
         database = MASTERNODE_DB
         table_name = 'regticket'
 
+
 class Chunk(Model):
     chunk_id = CharField(unique=True)
     image_hash = BlobField()
@@ -45,6 +47,7 @@ class Chunk(Model):
     class Meta:
         database = MASTERNODE_DB
         table_name = 'chunk'
+
 
 class Masternode(Model):
     ext_address = CharField(unique=True)  # ip:port

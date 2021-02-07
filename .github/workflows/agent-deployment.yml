@@ -54,4 +54,4 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
             docker pull docker.pkg.github.com/alexdobrushskiy/mn-agent/agent:latest
-            docker run -d -v /home/animecoinuser/.pastel:/opt/app/server/container_db docker.pkg.github.com/alexdobrushskiy/mn-agent/agent:latest > .mn-agent-container-id
+            docker run -d -v /home/animecoinuser/.pastel:/opt/app/agent/container_db docker.pkg.github.com/alexdobrushskiy/mn-agent/agent:latest > .mn-agent-container-id

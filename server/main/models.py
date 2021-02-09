@@ -15,6 +15,7 @@ class Masternode(models.Model):
     address = models.CharField(max_length=35, null=True)
     balance = models.IntegerField(null=True)
     pastelID = models.CharField(max_length=86, unique=True)
+    name = models.CharField(max_length=35)
 
     def __str__(self):
         return '{}'.format(self.ip)

@@ -13,7 +13,7 @@ from main.models import Masternode, Regticket, Chunk, MNConnection
 class MasternodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Masternode
-        fields = ('ip', 'address', 'balance', 'pastelID')
+        fields = ('ip', 'address', 'balance', 'pastelID', 'name')
 
 
 class RegticketSerializer(serializers.ModelSerializer):
@@ -103,7 +103,7 @@ class MNConnectionApiView(generics.CreateAPIView):
 
 
 def show_masternode_data(request):
-    field_names = ['id', 'ip', 'address', 'balance', 'pastelID']
+    field_names = ['id', 'ip', 'address', 'balance', 'pastelID', 'name']
     masternodes = []
     for mn in Masternode.objects.all():
         line = dict()
@@ -119,6 +119,7 @@ def show_masternode_data(request):
         'fields': field_names
     }
     return render(request, 'mn_data.html', context=context)
+
 
 def show_single_masternode_data(request, mn_id):
     masternode = Masternode.objects.get(id=mn_id)

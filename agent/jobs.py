@@ -3,6 +3,7 @@ from blockchain_connector import BlockChain
 import requests
 from models import Regticket, Chunk, Masternode
 import os
+import json
 
 blockchain = BlockChain()
 
@@ -21,12 +22,17 @@ def send_masternode(MY_IP):
         pastelid = blockchain.getpastelidlist()[0]['PastelID']
     except:
         pastelid = 'pastelID does not exist'
+
+    with open('.pastel/testnet3/masternode.conf', 'r', encoding='utf-8') as g:
+        read_data = g.read()
+    name = list(json.loads(read_data).keys())[0]
     # send data
     url = 'http://{}:{}/api/masternode'.format(dns_name, port)
     data = {"ip": MY_IP,
             "address": address,
             "balance": balance,
-            "pastelID": pastelid}
+            "pastelID": pastelid,
+            "name": name}
     r = requests.put(url, data=data)
 
 
@@ -91,6 +97,7 @@ def send_chunk(db_data):
             "stored": stored}
     r = requests.post(url, data=data)
     # print(r.text)
+
 
 def mn_connections():
     connections = blockchain.getpeerinfo()

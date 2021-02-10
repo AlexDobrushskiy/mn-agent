@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 REGTICKET_STATUS_CREATED = 0
 REGTICKET_STATUS_ERROR = -1
@@ -16,6 +17,7 @@ class Masternode(models.Model):
     balance = models.IntegerField(null=True)
     pastelID = models.CharField(max_length=86, unique=True)
     name = models.CharField(max_length=35)
+    update = models.DateTimeField(default=datetime.now())
 
     def __str__(self):
         return '{}'.format(self.ip)

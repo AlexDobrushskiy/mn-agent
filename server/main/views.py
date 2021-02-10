@@ -6,6 +6,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from datetime import datetime, date
 
 from main.models import Masternode, Regticket, Chunk, MNConnection
 
@@ -103,12 +104,14 @@ class MNConnectionApiView(generics.CreateAPIView):
 
 
 def show_masternode_data(request):
-    field_names = ['id', 'ip', 'address', 'balance', 'pastelID', 'name']
+    field_names = ['id', 'ip', 'address', 'balance', 'pastelID', 'name', 'update']
     masternodes = []
     for mn in Masternode.objects.all():
         line = dict()
         for field in field_names:
             line[field] = getattr(mn, field)
+            if field == 'update':
+                line[field] = datetime.now() - getattr(mn, field).replace(tzinfo=None)
         line['count chuncks'] = Chunk.objects.filter(mn_pastelid=mn).count()
         line['count regtickets'] = Regticket.objects.filter(masternode_pastelid=mn).count()
         masternodes.append(line)
